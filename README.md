@@ -7,7 +7,8 @@ Jetpack Compose Desktop app for calculating the cost of a certain facility, cons
   - ComposeState - UI related state holder, aware of changes to itself.
 - Architecture
   - Clean Architecture
-[Material Design 3](https://m3.material.io/) - the latest version of Material Design includes personalization and accessibility features that put people at the center.
+- Design
+  - [Material Design 3](https://m3.material.io/) - the latest version of Material Design includes personalization and accessibility features that put people at the center.
 # Screenshots
   # Initial view
   ![housecalc1](https://user-images.githubusercontent.com/62217711/202273196-de351a81-ca92-4486-ad52-4710d10d8003.png)
