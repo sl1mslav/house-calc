@@ -3,7 +3,7 @@ Jetpack Compose Desktop app for calculating the cost of a certain facility, cons
   # Tech stack & Open source libraries
 - [Kotlin](https://kotlinlang.org/) based.
 - JetPack
-  - [Compose Multiplatform] (https://developer.android.com/jetpack/compose) - simplifies and accelerates UI development for Desktop and Web applications, and allows extensive UI code sharing between Android, Desktop and Web.
+  - [Compose Multiplatform](https://developer.android.com/jetpack/compose) - simplifies and accelerates UI development for Desktop and Web applications, and allows extensive UI code sharing between Android, Desktop and Web.
   - ComposeState - UI related state holder, aware of changes to itself.
 - Architecture
   - Clean Architecture
