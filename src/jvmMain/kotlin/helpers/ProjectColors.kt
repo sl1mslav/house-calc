@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 /**
- * Объект для хранения кастомных тем приложения.
+ * РћР±СЉРµРєС‚ РґР»СЏ С…СЂР°РЅРµРЅРёСЏ РєР°СЃС‚РѕРјРЅС‹С… С‚РµРј РїСЂРёР»РѕР¶РµРЅРёСЏ.
  */
 object ProjectColors {
     enum class ThemeColors(val color: Color) {

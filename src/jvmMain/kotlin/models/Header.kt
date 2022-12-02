@@ -13,8 +13,8 @@ import androidx.compose.ui.unit.sp
 import helpers.ProjectColors
 
 /**
- * Простой класс заголовка
- * @param value текст, который необходимо отобразить в заголовке
+ * РџСЂРѕСЃС‚РѕР№ РєР»Р°СЃСЃ Р·Р°РіРѕР»РѕРІРєР°
+ * @param value С‚РµРєСЃС‚, РєРѕС‚РѕСЂС‹Р№ РЅРµРѕР±С…РѕРґРёРјРѕ РѕС‚РѕР±СЂР°Р·РёС‚СЊ РІ Р·Р°РіРѕР»РѕРІРєРµ
  */
 class Header(val value: String) : ItemUI() {
 

@@ -23,7 +23,7 @@ import models.OutputField
 
 object ComposeApp {
 
-    // Главная функция композиции приложения
+    // Р“Р»Р°РІРЅР°СЏ С„СѓРЅРєС†РёСЏ РєРѕРјРїРѕР·РёС†РёРё РїСЂРёР»РѕР¶РµРЅРёСЏ
     @Composable
     fun MainApp() {
         MaterialTheme {
@@ -35,16 +35,16 @@ object ComposeApp {
                 Column(
                     modifier = Modifier.verticalScroll(rememberScrollState())
                 ) {
-                    // Рисуем заголовок
+                    // Р РёСЃСѓРµРј Р·Р°РіРѕР»РѕРІРѕРє
                     Header(value = HEADER_TEXT).draw()
 
-                    // Контейнер с счётом площади помещения
+                    // РљРѕРЅС‚РµР№РЅРµСЂ СЃ СЃС‡С‘С‚РѕРј РїР»РѕС‰Р°РґРё РїРѕРјРµС‰РµРЅРёСЏ
                     var surfaceValue by remember { mutableStateOf<Float?>(null) }
                     InputContainer(
-                        labelText = "Расчёт площади дома",
+                        labelText = "Р Р°СЃС‡С‘С‚ РїР»РѕС‰Р°РґРё РґРѕРјР°",
                         modifier = Modifier.fillMaxWidth(),
                         outputValue = if (surfaceValue == null) "-" else surfaceValue.toString().replace(".", ","),
-                        outputLabel = "Площадь помещений (м2)",
+                        outputLabel = "РџР»РѕС‰Р°РґСЊ РїРѕРјРµС‰РµРЅРёР№ (Рј2)",
                     ) {
                         val inputs by remember {
                             mutableStateOf(
@@ -60,11 +60,11 @@ object ComposeApp {
                         }
 
                         val dropdownMenu = DropdownMenu(
-                            labelText = "Выберите тип дома",
+                            labelText = "Р’С‹Р±РµСЂРёС‚Рµ С‚РёРї РґРѕРјР°",
                             items = mapOf(
-                                "Одноэтажный" to 1f,
-                                "Полутораэтажный" to 1.5f,
-                                "Двухэтажный" to 2f
+                                "РћРґРЅРѕСЌС‚Р°Р¶РЅС‹Р№" to 1f,
+                                "РџРѕР»СѓС‚РѕСЂР°СЌС‚Р°Р¶РЅС‹Р№" to 1.5f,
+                                "Р”РІСѓС…СЌС‚Р°Р¶РЅС‹Р№" to 2f
                             ),
                             onItemClick = {
                                 inputs[0] = it
@@ -73,7 +73,7 @@ object ComposeApp {
                         )
 
                         val lengthField = CustomTextField(
-                            label = "Длина (м)",
+                            label = "Р”Р»РёРЅР° (Рј)",
                             onValueChange = {
                                 inputs[1] = it.replace(",", ".").toFloatOrNull()
                                 surfaceValue = multiplyInputs(inputs)
@@ -81,7 +81,7 @@ object ComposeApp {
                         )
 
                         val widthField = CustomTextField(
-                            label = "Ширина (м)",
+                            label = "РЁРёСЂРёРЅР° (Рј)",
                             onValueChange = {
                                 inputs[2] = it.replace(",", ".").toFloatOrNull()
                                 surfaceValue = multiplyInputs(inputs)
@@ -97,22 +97,22 @@ object ComposeApp {
                         }
                     }
 
-                    // Сумма всех значений материалов, выбранных пользователем
+                    // РЎСѓРјРјР° РІСЃРµС… Р·РЅР°С‡РµРЅРёР№ РјР°С‚РµСЂРёР°Р»РѕРІ, РІС‹Р±СЂР°РЅРЅС‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј
                     var inputSum by remember { mutableStateOf<Float?>(null) }
 
-                    // Общая цена, высчитывается если заполнены все поля
+                    // РћР±С‰Р°СЏ С†РµРЅР°, РІС‹СЃС‡РёС‚С‹РІР°РµС‚СЃСЏ РµСЃР»Рё Р·Р°РїРѕР»РЅРµРЅС‹ РІСЃРµ РїРѕР»СЏ
                     var cost by remember { mutableStateOf("-") }
                     cost = if (inputSum == null || surfaceValue == null)
                         "-"
                     else
-                        (surfaceValue!! + inputSum!!).toString().replace(".", ",")
+                        (surfaceValue!! * inputSum!!).toString().replace(".", ",")
 
-                    // Контейнер с расчётом стоимости строительства дома по проекту
+                    // РљРѕРЅС‚РµР№РЅРµСЂ СЃ СЂР°СЃС‡С‘С‚РѕРј СЃС‚РѕРёРјРѕСЃС‚Рё СЃС‚СЂРѕРёС‚РµР»СЊСЃС‚РІР° РґРѕРјР° РїРѕ РїСЂРѕРµРєС‚Сѓ
                     InputContainer(
-                        labelText = "Расчёт стоимости строительства дома по проекту ",
+                        labelText = "Р Р°СЃС‡С‘С‚ СЃС‚РѕРёРјРѕСЃС‚Рё СЃС‚СЂРѕРёС‚РµР»СЊСЃС‚РІР° РґРѕРјР° РїРѕ РїСЂРѕРµРєС‚Сѓ ",
                         modifier = Modifier.fillMaxWidth(),
-                        cost,
-                        "Общая цена проекта"
+                        outputValue = cost,
+                        outputLabel = "РћР±С‰Р°СЏ С†РµРЅР° РїСЂРѕРµРєС‚Р° (в‚Ѕ)"
                     ) {
                         val inputs by remember { mutableStateOf(MutableList<Float?>(4) { null }) }
 
@@ -124,11 +124,11 @@ object ComposeApp {
                         }
 
                         val houseFoundation = DropdownMenu(
-                            labelText = "Выберите фундамент дома",
+                            labelText = "Р’С‹Р±РµСЂРёС‚Рµ С„СѓРЅРґР°РјРµРЅС‚ РґРѕРјР°",
                             items = mapOf(
-                                "Свайно-ростверковый" to 1f,
-                                "Монолитная лента" to 2f,
-                                "Монолитная плита" to 3f
+                                "РЎРІР°Р№РЅРѕ-СЂРѕСЃС‚РІРµСЂРєРѕРІС‹Р№" to 1f,
+                                "РњРѕРЅРѕР»РёС‚РЅР°СЏ Р»РµРЅС‚Р°" to 2f,
+                                "РњРѕРЅРѕР»РёС‚РЅР°СЏ РїР»РёС‚Р°" to 3f
                             ),
                             onItemClick = {
                                 inputs[0] = it
@@ -137,12 +137,12 @@ object ComposeApp {
                         )
 
                         val bearingWalls = DropdownMenu(
-                            labelText = "Выберите тип несущих стен",
+                            labelText = "Р’С‹Р±РµСЂРёС‚Рµ С‚РёРї РЅРµСЃСѓС‰РёС… СЃС‚РµРЅ",
                             items = mapOf(
-                                "Газобетонные блоки" to 1f,
-                                "Керамические блоки" to 2f,
-                                "Монолитная технология" to 3f,
-                                "Деревянный каркас" to 4f
+                                "Р“Р°Р·РѕР±РµС‚РѕРЅРЅС‹Рµ Р±Р»РѕРєРё" to 1f,
+                                "РљРµСЂР°РјРёС‡РµСЃРєРёРµ Р±Р»РѕРєРё" to 2f,
+                                "РњРѕРЅРѕР»РёС‚РЅР°СЏ С‚РµС…РЅРѕР»РѕРіРёСЏ" to 3f,
+                                "Р”РµСЂРµРІСЏРЅРЅС‹Р№ РєР°СЂРєР°СЃ" to 4f
                             ),
                             onItemClick = {
                                 inputs[1] = it
@@ -151,11 +151,11 @@ object ComposeApp {
                         )
 
                         val facadeCladding = DropdownMenu(
-                            labelText = "Выберите облицовку фасада",
+                            labelText = "Р’С‹Р±РµСЂРёС‚Рµ РѕР±Р»РёС†РѕРІРєСѓ С„Р°СЃР°РґР°",
                             items = mapOf(
-                                "Облицовочный кирпич" to 1f,
-                                "Штукатурка декоративная" to 2f,
-                                "Металлический сайдинг" to 3f
+                                "РћР±Р»РёС†РѕРІРѕС‡РЅС‹Р№ РєРёСЂРїРёС‡" to 1f,
+                                "РЁС‚СѓРєР°С‚СѓСЂРєР° РґРµРєРѕСЂР°С‚РёРІРЅР°СЏ" to 2f,
+                                "РњРµС‚Р°Р»Р»РёС‡РµСЃРєРёР№ СЃР°Р№РґРёРЅРі" to 3f
                             ),
                             onItemClick = {
                                 inputs[2] = it
@@ -164,11 +164,11 @@ object ComposeApp {
                         )
 
                         val roofing = DropdownMenu(
-                            labelText = "Выберите тип кровли",
+                            labelText = "Р’С‹Р±РµСЂРёС‚Рµ С‚РёРї РєСЂРѕРІР»Рё",
                             items = mapOf(
-                                "Металлочерепица" to 1f,
-                                "Битумная черепица" to 2f,
-                                "Композитная черепица" to 3f
+                                "РњРµС‚Р°Р»Р»РѕС‡РµСЂРµРїРёС†Р°" to 1f,
+                                "Р‘РёС‚СѓРјРЅР°СЏ С‡РµСЂРµРїРёС†Р°" to 2f,
+                                "РљРѕРјРїРѕР·РёС‚РЅР°СЏ С‡РµСЂРµРїРёС†Р°" to 3f
                             ),
                             onItemClick = {
                                 inputs[3] = it
@@ -190,13 +190,13 @@ object ComposeApp {
     }
 
     /**
-     * Функция отрисовки контейнера (карточки), который можно заполнять
-     * различными полями. Их типы можно найти в детях класса ItemUI
-     * @param labelText заголовок контейнера
-     * @param modifier параметры заполнения пространства Compose
-     * @param outputValue значение, которое передаём для запоминания и отображения результата вычислений.
-     * @param outputLabel заголовок обязательного поля вывода информации
-     * @param content сюда передаётся Composable функция, чтобы можно было кастомизировать наполнение контейнера.
+     * Р¤СѓРЅРєС†РёСЏ РѕС‚СЂРёСЃРѕРІРєРё РєРѕРЅС‚РµР№РЅРµСЂР° (РєР°СЂС‚РѕС‡РєРё), РєРѕС‚РѕСЂС‹Р№ РјРѕР¶РЅРѕ Р·Р°РїРѕР»РЅСЏС‚СЊ
+     * СЂР°Р·Р»РёС‡РЅС‹РјРё РїРѕР»СЏРјРё. РС… С‚РёРїС‹ РјРѕР¶РЅРѕ РЅР°Р№С‚Рё РІ РґРµС‚СЏС… РєР»Р°СЃСЃР° ItemUI
+     * @param labelText Р·Р°РіРѕР»РѕРІРѕРє РєРѕРЅС‚РµР№РЅРµСЂР°
+     * @param modifier РїР°СЂР°РјРµС‚СЂС‹ Р·Р°РїРѕР»РЅРµРЅРёСЏ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІР° Compose
+     * @param outputValue Р·РЅР°С‡РµРЅРёРµ, РєРѕС‚РѕСЂРѕРµ РїРµСЂРµРґР°С‘Рј РґР»СЏ Р·Р°РїРѕРјРёРЅР°РЅРёСЏ Рё РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ СЂРµР·СѓР»СЊС‚Р°С‚Р° РІС‹С‡РёСЃР»РµРЅРёР№.
+     * @param outputLabel Р·Р°РіРѕР»РѕРІРѕРє РѕР±СЏР·Р°С‚РµР»СЊРЅРѕРіРѕ РїРѕР»СЏ РІС‹РІРѕРґР° РёРЅС„РѕСЂРјР°С†РёРё
+     * @param content СЃСЋРґР° РїРµСЂРµРґР°С‘С‚СЃСЏ Composable С„СѓРЅРєС†РёСЏ, С‡С‚РѕР±С‹ РјРѕР¶РЅРѕ Р±С‹Р»Рѕ РєР°СЃС‚РѕРјРёР·РёСЂРѕРІР°С‚СЊ РЅР°РїРѕР»РЅРµРЅРёРµ РєРѕРЅС‚РµР№РЅРµСЂР°.
      */
     @Composable
     fun InputContainer(
