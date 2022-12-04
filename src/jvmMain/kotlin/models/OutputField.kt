@@ -37,7 +37,7 @@ class OutputField(
                     .padding(bottom = 5.dp),
                 textAlign = TextAlign.End,
                 text = labelText,
-                fontSize = 20.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = ProjectColors.ThemeColors.TEXT_PRIMARY.color,
             )

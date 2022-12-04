@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.sp
 import helpers.MyExceptions
 import helpers.ProjectColors
 import helpers.Strings
+import helpers.Strings.COMMA_AFTER_ZERO
 import helpers.Strings.FIELD_ERROR_NAN
 
 /**
@@ -104,6 +105,9 @@ class CustomTextField(
             newValue.length <= oldValue.length -> {
                 return newValue
             }
+
+            newValue.length == 2 && newValue.first().toString() == "0" && newValue[1].toString() != "," ->
+                throw MyExceptions.TextFieldException(message = COMMA_AFTER_ZERO)
 
             (newValue.lastOrNull() ?: throw MyExceptions.TextFieldException(message = FIELD_ERROR_NAN)).isDigit() -> {
                 return oldValue + newValue.last()

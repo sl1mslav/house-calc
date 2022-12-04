@@ -17,4 +17,6 @@ object Strings {
     const val FIELD_ERROR_COMMA_START = "Запятая в начале недоступна"
     const val FIELD_ERROR_EXTRA_COMMA = "Доступна только одна запятая"
     const val FIELD_ERROR_NAN = "Недопустимый символ"
+    const val COMMA_AFTER_ZERO = "После нуля должна идти запятая"
+
 }

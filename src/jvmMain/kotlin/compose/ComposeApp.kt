@@ -20,6 +20,9 @@ import models.CustomTextField
 import models.DropdownMenu
 import models.Header
 import models.OutputField
+import java.math.BigDecimal
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 
 object ComposeApp {
 
@@ -38,25 +41,71 @@ object ComposeApp {
                     // Рисуем заголовок
                     Header(value = HEADER_TEXT).draw()
 
-                    // Контейнер с счётом площади помещения
+                    // ============= Общие переменные в контексте всего окна приложения ===================
+
+                    // Списки объектов, хрянящих выбранные пользователем значения (размерности / материалов)
+                    val sizeInputs by remember { mutableStateOf(MutableList<Float?>(6) { null }) }
+                    val materialInputs by remember { mutableStateOf(MutableList<Float?>(4) { null }) }
+
+                    // Общая цена, высчитывается если заполнены все поля
+                    var cost by remember { mutableStateOf<String?>("-") }
+
+                    // ====================================================================================
+
+                    // Контейнер с счётом размерности помещения
                     var surfaceValue by remember { mutableStateOf<Float?>(null) }
+                    surfaceValue =
+                        if (sizeInputs[1] == null || sizeInputs[2] == null)
+                            null
+                        else sizeInputs[1]!! * sizeInputs[2]!!
+
+                    var perimeterValue by remember { mutableStateOf<Float?>(null) }
+                    var volumeValue by remember { mutableStateOf<Float?>(null) }
+                    var foundationHeight by remember { mutableStateOf<Float?>(null) }
+
+                    fun calculateCost() {
+                        val toCalculate = listOf(
+                            foundationHeight,
+                            surfaceValue,
+                            materialInputs[0],
+                            materialInputs[1],
+                            materialInputs[2],
+                            materialInputs[3],
+                            volumeValue
+                        )
+                        cost = if (toCalculate.all { it != null }) {
+                            val result = (foundationHeight!! * surfaceValue!! * materialInputs[0]!! +
+                                    volumeValue!! * (materialInputs[1]!! + materialInputs[2]!!) + surfaceValue!! * materialInputs[3]!!)
+                            BigDecimal(result.toDouble()).toCoherentNumber()
+                        } else null
+                    }
+
                     InputContainer(
-                        labelText = "Расчёт площади дома",
+                        labelText = "Расчёт площади дома, объёма стен",
                         modifier = Modifier.fillMaxWidth(),
-                        outputValue = if (surfaceValue == null) "-" else surfaceValue.toString().replace(".", ","),
-                        outputLabel = "Площадь помещений (м2)",
+                        outputs = mapOf(
+                            "Периметр дома (м)" to perimeterValue?.toString(),
+                            "Площадь дома (м2)" to surfaceValue?.toString(),
+                            "Суммарный объём стен (м3)" to volumeValue?.toString()
+                        )
                     ) {
-                        val inputs by remember {
-                            mutableStateOf(
-                                MutableList<Float?>(3) { null }
-                            )
+
+                        fun calcPerimeter(length: Float?, width: Float?): Float? {
+                            return ((length ?: return null) + (width ?: return null)) * 2
                         }
 
-                        fun multiplyInputs(items: MutableList<Float?>): Float? {
-                            val result = items.reduce { acc, item ->
-                                (acc ?: return null) * (item ?: return null)
-                            }
-                            return result
+                        fun calcWallsVolume(): Float? {
+                            val toMultiplyList = listOf(
+                                perimeterValue,
+                                sizeInputs[0],
+                                sizeInputs[3],
+                                sizeInputs[4]
+                            )
+                            return if (toMultiplyList.all { it != null }) {
+                                toMultiplyList.reduce { acc, element ->
+                                    acc!! * element!!
+                                }?.times(0.01f) // умножаем на 0.01 поскольку толщина в см
+                            } else null
                         }
 
                         val dropdownMenu = DropdownMenu(
@@ -67,122 +116,131 @@ object ComposeApp {
                                 "Двухэтажный" to 2f
                             ),
                             onItemClick = {
-                                inputs[0] = it
-                                surfaceValue = multiplyInputs(inputs)
+                                sizeInputs[0] = it
+                                calculateCost()
                             }
                         )
 
                         val lengthField = CustomTextField(
                             label = "Длина (м)",
                             onValueChange = {
-                                inputs[1] = it.replace(",", ".").toFloatOrNull()
-                                surfaceValue = multiplyInputs(inputs)
+                                sizeInputs[1] = it.replace(",", ".").toFloatOrNull()
+                                perimeterValue = calcPerimeter(sizeInputs[1], sizeInputs[2])
+                                calculateCost()
                             }
                         )
 
                         val widthField = CustomTextField(
                             label = "Ширина (м)",
                             onValueChange = {
-                                inputs[2] = it.replace(",", ".").toFloatOrNull()
-                                surfaceValue = multiplyInputs(inputs)
+                                sizeInputs[2] = it.replace(",", ".").toFloatOrNull()
+                                perimeterValue = calcPerimeter(sizeInputs[1], sizeInputs[2])
+                                calculateCost()
                             }
                         )
 
-                        Column(
-                            modifier = Modifier.fillMaxWidth(0.45f)
-                        ) {
-                            dropdownMenu.draw()
-                            lengthField.draw()
-                            widthField.draw()
-                        }
+                        val heightField = CustomTextField(
+                            label = "Высота этажа (м)",
+                            onValueChange = {
+                                sizeInputs[3] = it.replace(",", ".").toFloatOrNull()
+                                volumeValue = calcWallsVolume()
+                                calculateCost()
+                            }
+                        )
+
+                        val wallThicknessField = CustomTextField(
+                            label = "Толщина стены (см)",
+                            onValueChange = {
+                                sizeInputs[4] = it.replace(",", ".").toFloatOrNull()
+                                volumeValue = calcWallsVolume()
+                                calculateCost()
+                            }
+                        )
+
+                        val foundationHeightField = CustomTextField(
+                            label = "Высота фундамента (м)",
+                            onValueChange = {
+                                sizeInputs[5] = it.replace(",", ".").toFloatOrNull()
+                                foundationHeight = sizeInputs[5]
+                                calculateCost()
+                            }
+                        )
+
+                        dropdownMenu.draw()
+                        lengthField.draw()
+                        widthField.draw()
+                        heightField.draw()
+                        wallThicknessField.draw()
+                        foundationHeightField.draw()
                     }
 
                     // Сумма всех значений материалов, выбранных пользователем
-                    var inputSum by remember { mutableStateOf<Float?>(null) }
-
-                    // Общая цена, высчитывается если заполнены все поля
-                    var cost by remember { mutableStateOf("-") }
-                    cost = if (inputSum == null || surfaceValue == null)
-                        "-"
-                    else
-                        (surfaceValue!! * inputSum!!).toString().replace(".", ",")
 
                     // Контейнер с расчётом стоимости строительства дома по проекту
                     InputContainer(
                         labelText = "Расчёт стоимости строительства дома по проекту ",
                         modifier = Modifier.fillMaxWidth(),
-                        outputValue = cost,
-                        outputLabel = "Общая цена проекта (₽)"
+                        outputs = mapOf(
+                            "Общая цена проекта (₽)" to cost
+                        )
                     ) {
-                        val inputs by remember { mutableStateOf(MutableList<Float?>(4) { null }) }
-
-                        fun sumInputs() {
-                            inputSum = if (inputs.any { it == null }) {
-                                null
-                            } else
-                                inputs.reduce { acc, float -> acc?.plus(float ?: 0f) }
-                        }
 
                         val houseFoundation = DropdownMenu(
                             labelText = "Выберите фундамент дома",
                             items = mapOf(
-                                "Свайно-ростверковый" to 1f,
-                                "Монолитная лента" to 2f,
-                                "Монолитная плита" to 3f
+                                "Монолитная лента" to 6500f,
+                                "Монолитная плита" to 15_000f
                             ),
                             onItemClick = {
-                                inputs[0] = it
-                                sumInputs()
+                                materialInputs[0] = it
+                                calculateCost()
                             }
                         )
 
                         val bearingWalls = DropdownMenu(
                             labelText = "Выберите тип несущих стен",
                             items = mapOf(
-                                "Газобетонные блоки" to 1f,
-                                "Керамические блоки" to 2f,
-                                "Монолитная технология" to 3f,
-                                "Деревянный каркас" to 4f
+                                "Газобетонные блоки" to 6_570f,
+                                "Керамические блоки" to 9_850f,
+                                "Монолитная технология" to 5_000f,
+                                "Деревянный каркас" to 4_000f
                             ),
                             onItemClick = {
-                                inputs[1] = it
-                                sumInputs()
+                                materialInputs[1] = it
+                                calculateCost()
                             }
                         )
 
                         val facadeCladding = DropdownMenu(
                             labelText = "Выберите облицовку фасада",
                             items = mapOf(
-                                "Облицовочный кирпич" to 1f,
-                                "Штукатурка декоративная" to 2f,
-                                "Металлический сайдинг" to 3f
+                                "Облицовочный кирпич" to 1_000f,
+                                "Штукатурка декоративная" to 300f,
+                                "Металлический сайдинг" to 700f
                             ),
                             onItemClick = {
-                                inputs[2] = it
-                                sumInputs()
+                                materialInputs[2] = it
+                                calculateCost()
                             }
                         )
 
                         val roofing = DropdownMenu(
                             labelText = "Выберите тип кровли",
                             items = mapOf(
-                                "Металлочерепица" to 1f,
-                                "Битумная черепица" to 2f,
-                                "Композитная черепица" to 3f
+                                "Металлочерепица" to 500f,
+                                "Битумная черепица" to 1_000f,
+                                "Композитная черепица" to 750f
                             ),
                             onItemClick = {
-                                inputs[3] = it
-                                sumInputs()
+                                materialInputs[3] = it
+                                calculateCost()
                             }
                         )
-                        Column(
-                            modifier = Modifier.fillMaxWidth(0.45f)
-                        ) {
-                            houseFoundation.draw()
-                            bearingWalls.draw()
-                            facadeCladding.draw()
-                            roofing.draw()
-                        }
+
+                        houseFoundation.draw()
+                        bearingWalls.draw()
+                        facadeCladding.draw()
+                        roofing.draw()
                     }
                 }
             }
@@ -194,16 +252,14 @@ object ComposeApp {
      * различными полями. Их типы можно найти в детях класса ItemUI
      * @param labelText заголовок контейнера
      * @param modifier параметры заполнения пространства Compose
-     * @param outputValue значение, которое передаём для запоминания и отображения результата вычислений.
-     * @param outputLabel заголовок обязательного поля вывода информации
+     * @param outputs словарь формы Заголовок - Значение, которое передаём для запоминания и отображения результата вычислений
      * @param content сюда передаётся Composable функция, чтобы можно было кастомизировать наполнение контейнера.
      */
     @Composable
     fun InputContainer(
         labelText: String,
         modifier: Modifier,
-        outputValue: String,
-        outputLabel: String,
+        outputs: Map<String, String?>,
         content: @Composable () -> Unit
     ) {
 
@@ -217,25 +273,44 @@ object ComposeApp {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     text = labelText,
-                    fontSize = 20.sp,
+                    fontSize = (21.5f).sp,
                     fontWeight = FontWeight.SemiBold,
                     color = ProjectColors.ThemeColors.TEXT_PRIMARY.color,
                     textAlign = TextAlign.Start
                 )
-                Box(
-                    modifier = Modifier.fillMaxWidth().wrapContentHeight()
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 15.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    content()
-                    OutputField(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .fillMaxWidth(0.4f)
-                            .wrapContentHeight(),
-                        labelText = outputLabel,
-                        value = outputValue
-                    ).draw()
+                    Column(
+                        modifier = Modifier.weight(1f, true).padding(top = 5.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        content()
+                    }
+                    Spacer(modifier = Modifier.weight(0.15f, true))
+                    Column(
+                        modifier = Modifier.weight(1f, true).align(Alignment.Bottom),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        for (output in outputs) {
+                            OutputField(
+                                modifier = Modifier,
+                                labelText = output.key,
+                                value = output.value?.replace(".", ",") ?: "-"
+                            ).draw()
+                        }
+                    }
                 }
             }
         }
+    }
+
+    private fun BigDecimal.toCoherentNumber(): String {
+        val decimalFormatSymbols = DecimalFormatSymbols().apply {
+            decimalSeparator = ','
+            groupingSeparator = ' '
+        }
+        return DecimalFormat("#,##0.00", decimalFormatSymbols).format(this)
     }
 }
