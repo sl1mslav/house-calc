@@ -20,10 +20,6 @@ fun App() {
  * Главная функция приложения.
  */
 fun main() = application {
-    /*val density = LocalDensity.current
-    val icon = remember {
-        useResource("") { loadSvgPainter(it, density) }
-    }*/
     Window(
         onCloseRequest = ::exitApplication,
         title = Strings.APP_NAME,
